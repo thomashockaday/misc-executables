@@ -143,7 +143,7 @@ then
 
     echo '> Launching in Chrome..'
     /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
-    echo '> Site running at URL:' ${IPADDRESS}
+    echo '> Site running at URL: https://'${IPADDRESS}
     echo '> [OPTIONAL] Givin em one of these..'
     echo '> Setup complete'
     echo ''
