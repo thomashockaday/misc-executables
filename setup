@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Note:
+# For some reason the migrations fail sometimes.
+# Delaying them with "sleep" reduces the chance of this happening.
+# If it persists, re-running the setup command should fix it.
+
+###
+
 # This script sets up a working environment from a base site repo.
 # It requires an existing src/.env.example file and an existing Vagrantfile,
 # which should exist already inside the directory.
