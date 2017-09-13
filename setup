@@ -1,18 +1,10 @@
 #!/bin/bash
 
-# Note:
-# For some reason the migrations fail sometimes.
-# Delaying them with "sleep" reduces the chance of this happening.
-# If it persists, re-running the setup command should fix it.
-
 ###
 
-# This script sets up a working environment from a base site repo.
-# It requires an existing src/.env.example file and an existing Vagrantfile,
-# which should exist already inside the directory.
-# This file itself should be kept in your $PATH folder
-# Which you can find by typing
-# $ echo $PATH
+# This script sets up a working environment from a Base site repo.
+# It requires an existing src/.env.example file and a Vagrantfile,
+# which should already exist inside the directory.
 #
 # It takes two parameters: PLATFORM and INITIAL
 # PLATFORM should either be "vagrant" or "docker"
@@ -44,7 +36,7 @@
 if [ $1 ]
 then
 
-  echo '> Pulling changes from repository..'
+  echo '> Pulling changes from the remote repository..'
   git pull
 
   # If the INITIAL parameter was passed
@@ -56,7 +48,6 @@ then
     grep 'ip: ' Vagrantfile > src/Vagrantfile_ip-address-line.txt
 
     # Copy the contents of the new file to the clipboard
-    # This is probably not the 'right' way to hold this information..
     pbcopy < src/Vagrantfile_ip-address-line.txt
     IPLINE=$(pbpaste)
 
@@ -96,11 +87,11 @@ then
   elif [ $1 = 'docker' ]
   then
 
+    # Check to see if repo is actually setup for Docker
     if [ -f 'docker-compose.dev.yml' ]
     then
 
-      # How the migrations are performed depends on the version of Base the site uses
-      # The easiest way to test this is to see if the docker-dev-migrate file exists
+      # The newer Base versions use a docker-dev-migrate file to perform migrations
       if [ -f 'bin/docker-dev-migrate' ]
       then
 
@@ -113,6 +104,7 @@ then
 
       else
 
+        # Older Base versions need to be worked around
         echo '> No migration file found.'
         echo '> Temporarily editing docker-compose.dev.yml file..'
 
@@ -145,19 +137,19 @@ then
         sleep 4
         bin/docker-dev exec php "php src/vendor/bin/phinx migrate"
         wait
-
-      else
-        echo 'Error: No docker-compose.dev.yml file detected.'
-        echo 'Please use one of the following:'
-        echo '$ setup vagrant initial'
-        echo '$ setup vagrant'
+        
       fi
 
+      # Overwrite IP address from the one in Vagrantfile to the one Docker said to use
+      IPADDRESS=$(docker-compose port nginx-proxy 443)
+
+    else
+      echo 'Error: No docker-compose.dev.yml file detected.'
+      echo 'Please use one of the following:'
+      echo '$ setup vagrant initial'
+      echo '$ setup vagrant'
     fi
   fi
-
-  # Overwrite IP address from the one in Vagrantfile to the one Docker said to use
-  IPADDRESS=$(docker-compose port nginx-proxy 443)
 
   echo '> Launching in Chrome..'
   /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
