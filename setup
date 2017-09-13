@@ -154,17 +154,18 @@ then
       fi
 
     fi
-
-    # Overwrite IP address from the one in Vagrantfile to the one Docker said to use
-    IPADDRESS=$(docker-compose port nginx-proxy 443)
-
-    echo '> Launching in Chrome..'
-    /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
-    echo '> Site running at URL: https://'${IPADDRESS}
-    echo '> [OPTIONAL] Givin em one of these..'
-    echo '> Setup complete'
-    echo ''
   fi
+
+  # Overwrite IP address from the one in Vagrantfile to the one Docker said to use
+  IPADDRESS=$(docker-compose port nginx-proxy 443)
+
+  echo '> Launching in Chrome..'
+  /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
+  echo '> Site running at URL: https://'${IPADDRESS}
+  echo '> [OPTIONAL] Givin em one of these..'
+  echo '> Setup complete'
+  echo ''
+
 else
   echo 'Error: No platform entered.'
   echo 'Possible usage cases:'
