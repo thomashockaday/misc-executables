@@ -96,52 +96,62 @@ then
   elif [ $1 = 'docker' ]
   then
 
-    # How the migrations are performed depends on the version of Base the site uses
-    # The easiest way to test this is to see if the docker-dev-migrate file exists
-    if [ -f "bin/docker-dev-migrate" ]
+    if [ -f 'docker-compose.dev.yml' ]
     then
 
-      echo '> Launching Docker images in daemon mode..'
-      bin/docker-dev-up -d
-      wait
+      # How the migrations are performed depends on the version of Base the site uses
+      # The easiest way to test this is to see if the docker-dev-migrate file exists
+      if [ -f 'bin/docker-dev-migrate' ]
+      then
 
-      echo '> Migrating database..'
-    	bin/docker-dev-migrate
+        echo '> Launching Docker images in daemon mode..'
+        bin/docker-dev-up -d
+        wait
 
-    else
+        echo '> Migrating database..'
+      	bin/docker-dev-migrate
 
-      echo '> No migration file found.'
-      echo '> Temporarily editing docker-compose.dev.yml file..'
+      else
 
-      # Set the php container working directory to /opt to make migrations easier
-      sed $'s/php:/php:\\\n    working_dir: \\/opt/g' docker-compose.dev.yml > docker-compose.dev.yml.new
-      mv docker-compose.dev.yml.new docker-compose.dev.yml
+        echo '> No migration file found.'
+        echo '> Temporarily editing docker-compose.dev.yml file..'
 
-      echo '> Launching Docker images in daemon mode..'
-      bin/docker-dev-up -d
-      wait
+        # Set the php container working directory to /opt to make migrations easier
+        sed $'s/php:/php:\\\n    working_dir: \\/opt/g' docker-compose.dev.yml > docker-compose.dev.yml.new
+        mv docker-compose.dev.yml.new docker-compose.dev.yml
 
-      echo '> Resetting docker-compose.dev.yml file..'
+        echo '> Launching Docker images in daemon mode..'
+        bin/docker-dev-up -d
+        wait
 
-      # Remove the working_dir line from the docker-compose.dev.yml
-      sed '/working_dir: \/opt/d' docker-compose.dev.yml > docker-compose.dev.yml.new
-      mv docker-compose.dev.yml.new docker-compose.dev.yml
+        echo '> Resetting docker-compose.dev.yml file..'
 
-      # According to this:
-      # https://unix.stackexchange.com/questions/98801/how-do-i-stop-sed-from-adding-extra-newline-characters
-      # The docker-compose.dev file should end in a new line.
-      # For this reason, the commands sed and mv ensure there is a new line at the end of the file,
-      # but this doesn't match the file in Base and causes Github to register the change.
-      # This removes the new line -
-      # Effectively resetting the file to how it was before this script ran.
-      # Again, there is probably a much better way to go about this.
-      printf "" | dd  of='docker-compose.dev.yml' seek=275 bs=1 count=1
+        # Remove the working_dir line from the docker-compose.dev.yml
+        sed '/working_dir: \/opt/d' docker-compose.dev.yml > docker-compose.dev.yml.new
+        mv docker-compose.dev.yml.new docker-compose.dev.yml
 
-      echo '> Migrating database..'
-      # For some reason there needs to be a delay before the migration can take place
-      sleep 4
-      bin/docker-dev exec php "php src/vendor/bin/phinx migrate"
-      wait
+        # According to this:
+        # https://unix.stackexchange.com/questions/98801/how-do-i-stop-sed-from-adding-extra-newline-characters
+        # The docker-compose.dev file should end in a new line.
+        # For this reason, the commands sed and mv ensure there is a new line at the end of the file,
+        # but this doesn't match the file in Base and causes Github to register the change.
+        # This removes the new line -
+        # Effectively resetting the file to how it was before this script ran.
+        # Again, there is probably a much better way to go about this.
+        printf "" | dd  of='docker-compose.dev.yml' seek=275 bs=1 count=1
+
+        echo '> Migrating database..'
+        # For some reason there needs to be a delay before the migration can take place
+        sleep 4
+        bin/docker-dev exec php "php src/vendor/bin/phinx migrate"
+        wait
+
+      else
+        echo 'Error: No docker-compose.dev.yml file detected.'
+        echo 'Please use one of the following:'
+        echo '$ setup vagrant initial'
+        echo '$ setup vagrant'
+      fi
 
     fi
 
