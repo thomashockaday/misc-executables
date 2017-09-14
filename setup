@@ -91,53 +91,21 @@ then
     if [ -f 'docker-compose.dev.yml' ]
     then
 
+      echo '> Launching Docker images in daemon mode..'
+      bin/docker-dev-up -d
+      wait
+      echo '> Migrating database..'
+
       # The newer Base versions use a docker-dev-migrate file to perform migrations
       if [ -f 'bin/docker-dev-migrate' ]
       then
-
-        echo '> Launching Docker images in daemon mode..'
-        bin/docker-dev-up -d
-        wait
-
-        echo '> Migrating database..'
       	bin/docker-dev-migrate
-
       else
-
         # Older Base versions need to be worked around
-        echo '> No migration file found.'
-        echo '> Temporarily editing docker-compose.dev.yml file..'
-
-        # Set the php container working directory to /opt to make migrations easier
-        sed $'s/php:/php:\\\n    working_dir: \\/opt/g' docker-compose.dev.yml > docker-compose.dev.yml.new
-        mv docker-compose.dev.yml.new docker-compose.dev.yml
-
-        echo '> Launching Docker images in daemon mode..'
-        bin/docker-dev-up -d
-        wait
-
-        echo '> Resetting docker-compose.dev.yml file..'
-
-        # Remove the working_dir line from the docker-compose.dev.yml
-        sed '/working_dir: \/opt/d' docker-compose.dev.yml > docker-compose.dev.yml.new
-        mv docker-compose.dev.yml.new docker-compose.dev.yml
-
-        # According to this:
-        # https://unix.stackexchange.com/questions/98801/how-do-i-stop-sed-from-adding-extra-newline-characters
-        # The docker-compose.dev file should end in a new line.
-        # For this reason, the commands sed and mv ensure there is a new line at the end of the file,
-        # but this doesn't match the file in Base and causes Github to register the change.
-        # This removes the new line -
-        # Effectively resetting the file to how it was before this script ran.
-        # Again, there is probably a much better way to go about this.
-        printf "" | dd  of='docker-compose.dev.yml' seek=275 bs=1 count=1
-
-        echo '> Migrating database..'
         # For some reason there needs to be a delay before the migration can take place
         sleep 4
-        bin/docker-dev exec php "php src/vendor/bin/phinx migrate"
+        bin/docker-dev run -w /opt php "php src/vendor/bin/phinx migrate"
         wait
-        
       fi
 
       # Overwrite IP address from the one in Vagrantfile to the one Docker said to use
