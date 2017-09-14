@@ -100,10 +100,9 @@ then
       if [ -f 'bin/docker-dev-migrate' ]
       then
       	bin/docker-dev-migrate
+        wait
       else
         # Older Base versions need to be worked around
-        # For some reason there needs to be a delay before the migration can take place
-        sleep 4
         bin/docker-dev run -w /opt php "php src/vendor/bin/phinx migrate"
         wait
       fi
