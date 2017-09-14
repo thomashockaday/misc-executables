@@ -59,16 +59,14 @@ then
 
     # Make changes to environment constants
     # Then save in a new file (.env)
-    sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env.example > src/.env
+    sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env
 
     # Output changes
     echo ''
     echo '> Generating .env file..'
-    echo '> Set APP_SECURE to false'
     echo '> Set APP_IN_TEST_MODE to true'
     echo '> Set CACHE_DRIVER to array'
     echo '> Commented out SMTP_SERVER=maildev'
-    echo '> Set APP_HOST to' ${IPADDRESS}
 
     echo '> Installing Composer dependencies..'
     composer install
@@ -81,6 +79,12 @@ then
   # handle PLATFORM parameter
   if [ $1 = 'vagrant' ]
   then
+
+    # Set environment constants for the Vagrant platform
+    sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env.example > src/.env
+    echo '> Set APP_SECURE to false'
+    echo '> Set APP_HOST to' ${IPADDRESS}
+
     echo '> Preparing virtual machine..'
     vagrant up
     wait
@@ -109,6 +113,10 @@ then
 
       # Overwrite IP address from the one in Vagrantfile to the one Docker said to use
       IPADDRESS=$(docker-compose port nginx-proxy 443)
+
+      # Set environment constants for the Docker platform
+      sed -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env.example > src/.env
+      echo '> Set APP_HOST to' ${IPADDRESS}
 
     else
       echo 'Error: No docker-compose.dev.yml file detected.'
