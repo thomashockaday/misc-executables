@@ -60,6 +60,7 @@ then
     # Make changes to environment constants
     # Then save in a new file (.env)
     sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env.new
+    mv src/.env.new src/.env
 
     # Output changes
     echo ''
@@ -81,7 +82,7 @@ then
   then
 
     # Set environment constants for the Vagrant platform
-    sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env.new > src/.env
+    sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
     echo '> Set APP_SECURE to false'
     echo '> Set APP_HOST to' ${IPADDRESS}
 
@@ -115,18 +116,19 @@ then
       IPADDRESS=$(docker-compose port nginx-proxy 443)
 
       # Set environment constants for the Docker platform
-      sed -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env.new > src/.env
+      sed -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
       echo '> Set APP_HOST to' ${IPADDRESS}
 
     else
       echo 'Error: No docker-compose.dev.yml file detected.'
-      echo 'Please use one of the following:'
-      echo '$ setup vagrant initial'
+      echo 'Please use the following:'
       echo '$ setup vagrant'
+      exit;
     fi
   fi
 
-  rm -f src/.env.new
+  # Clean up environment files
+  mv src/.env.new src/.env
 
   echo '> Launching in Chrome..'
   /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
