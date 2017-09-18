@@ -121,7 +121,8 @@ then
 
     else
       echo 'Error: No docker-compose.dev.yml file detected.'
-      echo 'Please use the following:'
+      echo 'Please use one of the following:'
+      echo '$ setup vagrant initial'
       echo '$ setup vagrant'
       exit;
     fi
