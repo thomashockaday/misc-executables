@@ -81,14 +81,23 @@ then
   if [ $1 = 'vagrant' ]
   then
 
-    # Set environment constants for the Vagrant platform
-    sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
-    echo '> Set APP_SECURE to false'
-    echo '> Set APP_HOST to' ${IPADDRESS}
+    # Check to see if a Vagrantfile exists
+    if [ -f 'Vagrantfile' ]
+    then
 
-    echo '> Preparing virtual machine..'
-    vagrant up
-    wait
+      # Set environment constants for the Vagrant platform
+      sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
+      echo '> Set APP_SECURE to false'
+      echo '> Set APP_HOST to' ${IPADDRESS}
+
+      echo '> Preparing virtual machine..'
+      vagrant up
+      wait
+    else
+      echo 'Error: No Vagrantfile detected.'
+      echo 'Aborting script.'
+      exit;
+    fi
   elif [ $1 = 'docker' ]
   then
 
