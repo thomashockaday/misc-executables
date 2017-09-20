@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker run --rm -it -v"$(pwd):/opt" -v ~/.ssh/opia_rackspace_rsa:/root/.ssh/id_rsa -v ~/.ssh/opia_rackspace_rsa.pub:/root/.ssh/id_rsa.pub capistrano cap $@
