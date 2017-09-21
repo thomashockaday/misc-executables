@@ -17,8 +17,7 @@ then
 
   if [ $2 ] && [ $2 = 'initial' ]
   then
-
-    if [ -f 'Vagrantfile' ]
+    if [ -f 'Vagrantfile' ] && [ -f 'src/.env.example' ]
     then
 
       # Store the 'config.vm.network' line from Vagrantfile in a new file
@@ -37,9 +36,9 @@ then
       # Make changes to environment constants
       sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env.new
       mv src/.env.new src/.env
+      wait
 
       # Output changes
-      echo ''
       echo '> Generating .env file..'
       echo '> Set APP_IN_TEST_MODE to true'
       echo '> Set CACHE_DRIVER to array'
@@ -49,72 +48,104 @@ then
 
     echo '> Installing Composer dependencies..'
     composer install
+    wait
 
     echo '> Locking dependencies..'
     yarn --pure-lockfile
+    wait
 
   fi
 
-  if [ $1 = 'vagrant' ] && [ -f 'Vagrantfile' ]
+  if [ $1 = 'vagrant' ]
   then
+    if [ -f 'Vagrantfile' ]
+    then
 
-    # Set environment constants for the Vagrant platform
-    sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
-    echo '> Set APP_SECURE to false'
-    echo '> Set APP_HOST to' ${IPADDRESS}
-    echo '> Preparing virtual machine..'
-    vagrant up
-    wait
-  else
-    echo 'Error: No Vagrantfile detected.'
-    echo 'Aborting script.'
-    exit;
+      # Set environment constants for the Vagrant platform
+      sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
+      echo '> Set APP_SECURE to false'
+      echo '> Set APP_HOST to' ${IPADDRESS}
+      echo '> Preparing virtual machine..'
+      vagrant up
+      wait
+
+    else
+      echo 'ERROR: No Vagrantfile detected.'
+      echo 'Please make sure you are actually inside a repo,'
+      echo 'Then use one of the following:'
+      echo '$ setup docker initial'
+      echo '$ setup docker'
+      exit
+    fi
+
   elif [ $1 = 'docker' ]
   then
-
     if [ -f 'docker-compose.dev.yml' ]
     then
 
       echo '> Launching Docker images in daemon mode..'
       bin/docker-dev-up -d
       wait
-      echo '> Migrating database..'
 
+      echo '> Migrating database..'
       if [ -f 'bin/docker-dev-migrate' ]
       then
       	bin/docker-dev-migrate
-        wait
       else
-        bin/docker-dev run -w /opt php "php src/vendor/bin/phinx migrate"
-        wait
+        if [ -d 'docker/web' ]
+        then
+          CONTAINER = 'web'
+        else
+          CONTAINER = 'php'
+        fi
+        bin/docker-dev run -w /opt ${CONTAINER} "php src/vendor/bin/phinx migrate"
       fi
+      wait
 
-      # Overwrite IP address from the one in Vagrantfile to the one Docker said to use
+      # Overwrite IPADDRESS from the one in Vagrantfile to the one Docker said to use
       IPADDRESS=$(docker-compose port nginx-proxy 443)
 
-      # Set environment constants for the Docker platform
-      sed -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
-      echo '> Set APP_HOST to' ${IPADDRESS}
+      if [ -f 'src/.env.example' ]
+      then
 
+        # Set environment constants for the Docker platform
+        sed -e 's/APP_SECURE=false/APP_SECURE=true/g' -e 's/APP_HOST=.*/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
+        echo '> Set APP_SECURE to true'
+        echo '> Set APP_HOST to' ${IPADDRESS}
+        wait
+
+      fi
     else
-      echo 'Error: No docker-compose.dev.yml file detected.'
-      echo 'Please use one of the following:'
+      echo 'ERROR: No docker.compose.dev.yml file detected.'
+      echo 'Please make sure you are actually inside a repo,'
+      echo 'Then use one of the following:'
       echo '$ setup vagrant initial'
       echo '$ setup vagrant'
-      exit;
+      exit
     fi
+
+    # Launch
+    echo '> Launching in Chrome..'
+    /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
+    echo '> Site running at URL: https://'${IPADDRESS}
+
+  else
+    echo 'ERROR: Incorrect platform parameter entered.'
+    echo 'Please make sure you are actually inside a repo,'
+    echo 'Then use one of the following:'
+    echo '$ setup docker initial'
+    echo '$ setup docker'
+    echo '$ setup vagrant initial'
+    echo '$ setup vagrant'
+    exit
   fi
 
   # Clean up environment files
   mv src/.env.new src/.env
 
-  # Finish up
-  echo '> Launching in Chrome..'
-  /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
-  echo '> Site running at URL: https://'${IPADDRESS}
+  # Finish
   echo '> [OPTIONAL] Givin em one of these..'
   echo '> Setup complete'
-  echo ''
 
 else
   echo 'Error: No platform entered.'
