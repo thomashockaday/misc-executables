@@ -1,41 +1,51 @@
 #!/bin/bash
 
-# Only run if the PLATFORM parameter was passed
+# $1 = PLATFORM
+# $2 = INITIAL
+
+# Usage Cases:
+# $ setup docker
+# $ setup docker initial
+# $ setup vagrant
+# $ setup vagrant initial
+
 if [ $1 ]
 then
 
   echo '> Pulling changes from the remote repository..'
   git pull
 
-  # If the INITIAL parameter was passed
   if [ $2 ] && [ $2 = 'initial' ]
   then
 
-    # Grab the 'config.vm.network' line from Vagrantfile
-    # Store it in a new file
-    grep 'ip: ' Vagrantfile > src/Vagrantfile_ip-address-line.txt
+    if [ -f 'Vagrantfile' ]
+    then
 
-    # Copy the contents of the new file to the clipboard
-    pbcopy < src/Vagrantfile_ip-address-line.txt
-    IPLINE=$(pbpaste)
+      # Store the 'config.vm.network' line from Vagrantfile in a new file
+      grep 'ip: ' Vagrantfile > src/Vagrantfile_ip-address-line.txt
 
-    # Strip the line down to just the IP address itself
-    IPADDRESS=$(echo ${IPLINE#*ip: } | sed -e 's/^"//' -e 's/"$//')
+      # Copy the contents of the new file to the clipboard
+      pbcopy < src/Vagrantfile_ip-address-line.txt
+      IPLINE=$(pbpaste)
 
-    # Delete file holding the original line of text
-    rm -f src/Vagrantfile_ip-address-line.txt
+      # Strip the line down to just the IP address itself
+      IPADDRESS=$(echo ${IPLINE#*ip: } | sed -e 's/^"//' -e 's/"$//')
 
-    # Make changes to environment constants
-    # Then save in a new file (.env)
-    sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env.new
-    mv src/.env.new src/.env
+      # Delete file holding the original line of text
+      rm -f src/Vagrantfile_ip-address-line.txt
 
-    # Output changes
-    echo ''
-    echo '> Generating .env file..'
-    echo '> Set APP_IN_TEST_MODE to true'
-    echo '> Set CACHE_DRIVER to array'
-    echo '> Commented out SMTP_SERVER=maildev'
+      # Make changes to environment constants
+      sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env.new
+      mv src/.env.new src/.env
+
+      # Output changes
+      echo ''
+      echo '> Generating .env file..'
+      echo '> Set APP_IN_TEST_MODE to true'
+      echo '> Set CACHE_DRIVER to array'
+      echo '> Commented out SMTP_SERVER=maildev'
+
+    fi
 
     echo '> Installing Composer dependencies..'
     composer install
@@ -45,31 +55,23 @@ then
 
   fi
 
-  # handle PLATFORM parameter
-  if [ $1 = 'vagrant' ]
+  if [ $1 = 'vagrant' ] && [ -f 'Vagrantfile' ]
   then
 
-    # Check to see if a Vagrantfile exists
-    if [ -f 'Vagrantfile' ]
-    then
-
-      # Set environment constants for the Vagrant platform
-      sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
-      echo '> Set APP_SECURE to false'
-      echo '> Set APP_HOST to' ${IPADDRESS}
-
-      echo '> Preparing virtual machine..'
-      vagrant up
-      wait
-    else
-      echo 'Error: No Vagrantfile detected.'
-      echo 'Aborting script.'
-      exit;
-    fi
+    # Set environment constants for the Vagrant platform
+    sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
+    echo '> Set APP_SECURE to false'
+    echo '> Set APP_HOST to' ${IPADDRESS}
+    echo '> Preparing virtual machine..'
+    vagrant up
+    wait
+  else
+    echo 'Error: No Vagrantfile detected.'
+    echo 'Aborting script.'
+    exit;
   elif [ $1 = 'docker' ]
   then
 
-    # Check to see if repo is actually setup for Docker
     if [ -f 'docker-compose.dev.yml' ]
     then
 
@@ -78,13 +80,11 @@ then
       wait
       echo '> Migrating database..'
 
-      # The newer Base versions use a docker-dev-migrate file to perform migrations
       if [ -f 'bin/docker-dev-migrate' ]
       then
       	bin/docker-dev-migrate
         wait
       else
-        # Older Base versions need to be worked around
         bin/docker-dev run -w /opt php "php src/vendor/bin/phinx migrate"
         wait
       fi
@@ -108,6 +108,7 @@ then
   # Clean up environment files
   mv src/.env.new src/.env
 
+  # Finish up
   echo '> Launching in Chrome..'
   /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
   echo '> Site running at URL: https://'${IPADDRESS}
