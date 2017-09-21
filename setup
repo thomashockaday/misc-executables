@@ -1,37 +1,5 @@
 #!/bin/bash
 
-###
-
-# This script sets up a working environment from a Base site repo.
-# It requires an existing src/.env.example file and a Vagrantfile,
-# which should already exist inside the directory.
-#
-# It takes two parameters: PLATFORM and INITIAL
-# PLATFORM should either be "vagrant" or "docker"
-# depending on which version of base the site is built on -
-# or your personal preference
-#
-# INITIAL is an optional parameter.
-# It tells the script whether to do a complete installation,
-# Or just set up the environment itself.
-# INITIAL should be used when installing dependencies,
-# such as after first cloning a repo.
-#
-# It should be ran in the root directory of a repository.
-# For example:
-# $ git clone [repo url] [repo name]
-# $ cd [repo name]
-# $ setup [docker/vagrant] [initial?]
-#
-# Possible usage cases:
-#
-# $ setup docker initial
-# $ setup docker
-# $ setup vagrant initial
-# $ setup vagrant
-
-###
-
 # Only run if the PLATFORM parameter was passed
 if [ $1 ]
 then
