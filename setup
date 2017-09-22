@@ -84,9 +84,9 @@ then
       else
         if [ -d 'docker/web' ]
         then
-          CONTAINER = 'web'
+          CONTAINER='web'
         else
-          CONTAINER = 'php'
+          CONTAINER='php'
         fi
         echo '> Migrating database..'
         bin/docker-dev run -w /opt ${CONTAINER} "php src/vendor/bin/phinx migrate"
