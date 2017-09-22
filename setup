@@ -17,21 +17,8 @@ then
 
   if [ $2 ] && [ $2 = 'initial' ]
   then
-    if [ -f 'Vagrantfile' ] && [ -f 'src/.env.example' ]
+    if [ -f 'src/.env.example' ]
     then
-
-      # Store the 'config.vm.network' line from Vagrantfile in a new file
-      grep 'ip: ' Vagrantfile > src/Vagrantfile_ip-address-line.txt
-
-      # Copy the contents of the new file to the clipboard
-      pbcopy < src/Vagrantfile_ip-address-line.txt
-      IPLINE=$(pbpaste)
-
-      # Strip the line down to just the IP address itself
-      IPADDRESS=$(echo ${IPLINE#*ip: } | sed -e 's/^"//' -e 's/"$//')
-
-      # Delete file holding the original line of text
-      rm -f src/Vagrantfile_ip-address-line.txt
 
       # Make changes to environment constants
       sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env.new
@@ -60,6 +47,10 @@ then
   then
     if [ -f 'Vagrantfile' ]
     then
+
+      # Grab the IP address from Vagrantfile
+      IPLINE=$(grep 'ip: ' Vagrantfile)
+      IPADDRESS=$(echo ${IPLINE#*ip: } | sed -e 's/^"//' -e 's/"$//')
 
       # Set environment constants for the Vagrant platform
       sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
