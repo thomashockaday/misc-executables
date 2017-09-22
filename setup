@@ -123,12 +123,6 @@ then
       echo '$ setup vagrant'
       exit
     fi
-
-    # Launch
-    echo '> Launching in Chrome..'
-    /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
-    echo '> Site running at URL: https://'${IPADDRESS}
-
   else
     echo 'ERROR: Incorrect platform parameter entered.'
     echo 'Please make sure you are actually inside a repo,'
@@ -139,6 +133,11 @@ then
     echo '$ setup vagrant'
     exit
   fi
+
+  # Launch
+  echo '> Launching in Chrome..'
+  /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
+  echo '> Site running at URL: https://'${IPADDRESS}
 
   # Clean up environment files
   mv src/.env.new src/.env
