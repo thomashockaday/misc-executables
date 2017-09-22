@@ -87,7 +87,6 @@ then
       bin/docker-dev-up -d
       wait
 
-      echo '> Migrating database..'
       if [ -f 'bin/docker-dev-migrate' ]
       then
       	bin/docker-dev-migrate
@@ -98,12 +97,17 @@ then
         else
           CONTAINER = 'php'
         fi
+        echo '> Migrating database..'
         bin/docker-dev run -w /opt ${CONTAINER} "php src/vendor/bin/phinx migrate"
       fi
       wait
 
-      # Overwrite IPADDRESS from the one in Vagrantfile to the one Docker said to use
-      IPADDRESS=$(docker-compose port nginx-proxy 443)
+      if [ -d 'docker/web' ]
+      then
+        IPADDRESS=$(bin/docker-dev port nginx-proxy 443)
+      else
+        IPADDRESS=$(docker-compose port nginx-proxy 443)
+      fi
 
       if [ -f 'src/.env.example' ]
       then
