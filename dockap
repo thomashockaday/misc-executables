@@ -1,3 +1,9 @@
 #!/bin/bash
 
+sed -e "/lock '3.4.0'/s/^/# /g" deploy/config/deploy.rb > deploy/config/deploy.rb.new
+mv deploy/config/deploy.rb deploy/config/deploy.rb.new
+
 docker run --rm -it -v"$(pwd):/opt" -v ~/.ssh/opia_rackspace_rsa:/root/.ssh/id_rsa -v ~/.ssh/opia_rackspace_rsa.pub:/root/.ssh/id_rsa.pub capistrano cap $@
+wait
+
+rm -rf logs
