@@ -1,3 +1,5 @@
 #!/bin/bash
 
-cp ~/Documents/Personal\ Repositories/misc-executables/* ~/../../../usr/local/sbin/
+source config
+
+cp ${WORKDIR}* ~/../../../usr/local/sbin/
