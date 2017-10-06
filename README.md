@@ -11,15 +11,15 @@
 
 Below is a breakdown of each script. They should be ran from the root folder of a repository.
 
-| File                      | Description                                        | Usage Case                           |
-| ------------------------- | -------------------------------------------------- | ------------------------------------ |
-| __config__                | Variable storage. Running this won't do anything.  | none                                 |
-| __importexecs__           | Transfers repo files into `/usr/local/sbin`        | $ importexecs                        |
-| __dockap__                | Deploy a site using a Capistrano Docker container  | $ dockap [staging/production] deploy |
-| __setup__                 | Quickly setup and launch a development environment | $ setup [docker/vagrant] [initial?]  |
-| __docssh__                | Enter a running Docker container                   | $ docssh                             |
-| __mysqlport__             | Print the port of the mysql Docker container       | $ mysqlport                          |
-| __give-em-one-of-these__  | For when some gangsta starts dissin' yo fly girl   | $ give-em-one-of-these               |
+| File                      | Description                                        | Usage Case                             |
+| ------------------------- | -------------------------------------------------- | -------------------------------------- |
+| __config__                | Variable storage. Running this won't do anything.  | none                                   |
+| __importexecs__           | Transfers repo files into `/usr/local/sbin`        | `$ importexecs`                        |
+| __dockap__                | Deploy a site using a Capistrano Docker container  | `$ dockap [staging/production] deploy` |
+| __setup__                 | Quickly setup and launch a development environment | `$ setup [docker/vagrant] [initial?]`  |
+| __docssh__                | Enter a running Docker container                   | `$ docssh`                             |
+| __mysqlport__             | Print the port of the mysql Docker container       | `$ mysqlport`                          |
+| __give-em-one-of-these__  | For when some gangsta starts dissin' yo fly girl   | `$ give-em-one-of-these`               |
 
 ---
 
