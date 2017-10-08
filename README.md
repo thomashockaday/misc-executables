@@ -3,8 +3,9 @@
 
 ## How to Use
 - Download the repository.
+- Create a config file by copying the `config.example` file and removing ".example"
 - Edit the `config` file, setting `WORKDIR` to the location of the folder where you downloaded the repo to.
-- Create a copy of all of the files in `/usr/local/sbin`.
+- Create a copy of all of the executable files in `/usr/local/sbin`. You can do this quickly by dragging the `importexecs` file into a Terminal window.
 - That's it!
 
 ---
