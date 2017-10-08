@@ -1,5 +1,11 @@
 #!/bin/bash
 
+chmod +x config
+
 source config
 
-cp ${WORKDIR}* ~/../../../usr/local/sbin/
+for f in ${WORKDIR}*; do
+  if [ -f "$f" ] && [ -x "$f" ]; then
+    cp "$f" ~/../../../usr/local/sbin/
+  fi
+done
