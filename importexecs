@@ -1,8 +1,8 @@
 #!/bin/bash
 
-chmod +x config
-
 source config
+
+chmod +x ${WORKDIR}config
 
 for f in ${WORKDIR}*; do
   if [ -f "$f" ] && [ -x "$f" ]; then
