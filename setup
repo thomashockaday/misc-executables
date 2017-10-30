@@ -9,6 +9,24 @@
 # $ setup vagrant
 # $ setup vagrant initial
 
+printError () {
+  echo 'Error:' $1
+  if [ $2 ]
+  then
+    echo 'Possible usage cases:'
+    if [[ $2 == *'d'* ]]
+    then
+      echo '$ setup docker initial'
+      echo '$ setup docker'
+    fi
+    if [[ $2 == *'v'* ]]
+    then
+      echo '$ setup vagrant initial'
+      echo '$ setup vagrant'
+    fi
+  fi
+}
+
 if [ $1 ]
 then
 
@@ -61,11 +79,7 @@ then
       wait
 
     else
-      echo 'ERROR: No Vagrantfile detected.'
-      echo 'Please make sure you are actually inside a repo,'
-      echo 'Then use one of the following:'
-      echo '$ setup docker initial'
-      echo '$ setup docker'
+      printError 'No Vagrantfile detected.' v
       exit
     fi
 
@@ -111,21 +125,11 @@ then
 
       fi
     else
-      echo 'ERROR: No docker.compose.dev.yml file detected.'
-      echo 'Please make sure you are actually inside a repo,'
-      echo 'Then use one of the following:'
-      echo '$ setup vagrant initial'
-      echo '$ setup vagrant'
+      printError 'No docker.compose.dev.yml file detected.' d
       exit
     fi
   else
-    echo 'ERROR: Incorrect platform parameter entered.'
-    echo 'Please make sure you are actually inside a repo,'
-    echo 'Then use one of the following:'
-    echo '$ setup docker initial'
-    echo '$ setup docker'
-    echo '$ setup vagrant initial'
-    echo '$ setup vagrant'
+    printError 'Incorrect platform parameter entered.' vd
     exit
   fi
 
@@ -142,10 +146,5 @@ then
   echo '> Setup complete'
 
 else
-  echo 'Error: No platform entered.'
-  echo 'Possible usage cases:'
-  echo '$ setup docker initial'
-  echo '$ setup docker'
-  echo '$ setup vagrant initial'
-  echo '$ setup vagrant'
+  printError 'No platform entered.' vd
 fi
