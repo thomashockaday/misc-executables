@@ -41,9 +41,6 @@ then
       # Make changes to environment constants
       sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env.new
       mv src/.env.new src/.env
-      wait
-
-      # Output changes
       echo '> Generating .env file..'
       echo '> Set APP_IN_TEST_MODE to true'
       echo '> Set CACHE_DRIVER to array'
@@ -51,11 +48,9 @@ then
 
     fi
 
-    echo '> Installing Composer dependencies..'
+    echo '> Installing dependencies..'
     composer install
     wait
-
-    echo '> Locking dependencies..'
     yarn --pure-lockfile
     wait
 
@@ -82,7 +77,6 @@ then
       printError 'No Vagrantfile detected.' v
       exit
     fi
-
   elif [ $1 = 'docker' ]
   then
     if [ -f 'docker-compose.dev.yml' ]
@@ -132,17 +126,12 @@ then
     printError 'Incorrect platform parameter entered.' vd
     exit
   fi
-
-  # Launch
   echo '> Launching in Chrome..'
   /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
   echo '> Site running at URL: https://'${IPADDRESS}
 
-  # Clean up environment files
   mv src/.env.new src/.env
-
   echo '> Setup complete'
-
 else
   printError 'No platform entered.' vd
 fi
