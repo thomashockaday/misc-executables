@@ -141,8 +141,6 @@ then
   # Clean up environment files
   mv src/.env.new src/.env
 
-  # Finish
-  echo '> [OPTIONAL] Givin em one of these..'
   echo '> Setup complete'
 
 else
