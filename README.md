@@ -4,7 +4,7 @@
 ## How to Use
 - Download the repository.
 - Create a config file by copying the `config.example` file and removing ".example"
-- Edit the `config` file, setting `WORKDIR` to the location of the folder where you downloaded the repo to.
+- Edit the `config` file, setting `WORKDIR` to the location of the folder where you downloaded the repo to, and `LOCATION` to your city.
 - Create a copy of all of the executable files in `/usr/local/sbin`. You can do this quickly by dragging the `importexecs` file into a Terminal window.
 - Add `export PATH="/usr/local/sbin:$PATH"` to the bottom of `~/.zshrc`.
 - That's it!
@@ -21,6 +21,7 @@ Below is a breakdown of each script. They should be ran from the root folder of 
 | __docssh__ | Enter a running Docker web container | `$ docssh` |
 | __mysqlport__ | Print the port number of the running mysql Docker container | `$ mysqlport` |
 | __brewmaintain__ | Update Homebrew as well as any installed formulae, then check for errors | `$ brewmaintain` |
+| __weather__ | Show the weather forecast for your configured location | `$ weather` |
 
 ---
 
