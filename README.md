@@ -20,7 +20,7 @@ Below is a breakdown of each script. They should be ran from the root folder of 
 | __setup__ | Quickly setup and launch a development environment using either Docker or Vagrant as a parameter. Optional parameter includes dependency installation and .env file creation. | `$ setup [docker/vagrant] [initial?]` |
 | __docssh__ | Enter a running Docker web container | `$ docssh` |
 | __mysqlport__ | Print the port number of the running mysql Docker container | `$ mysqlport` |
-| __brewmaintain__ | Update Homebrew as well as any installed formulae, then check for errors | `$ brewmaintain` |
+| __brewm__ | Update Homebrew as well as any installed formulae, then check for errors | `$ brewm` |
 | __weather__ | Show the weather forecast for your configured location | `$ weather` |
 
 ---
