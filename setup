@@ -22,13 +22,13 @@ then
     echo '> Set CACHE_DRIVER to array'
     echo '> Commented out SMTP_SERVER=maildev'
 
-  fi
+    echo '> Installing dependencies..'
+    composer install
+    wait
+    yarn --pure-lockfile
+    wait
 
-  echo '> Installing dependencies..'
-  composer install
-  wait
-  yarn --pure-lockfile
-  wait
+  fi
 
   if [ -f 'docker-compose.dev.yml' ]
   then
