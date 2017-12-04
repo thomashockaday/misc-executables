@@ -26,9 +26,17 @@ then
   if [ -f 'docker-compose.dev.yml' ]
   then
 
-    echo '> Launching Docker images in daemon mode..'
-    bin/docker-dev-up -d
+    echo '> Ignoring maildev links..'
+    sed -e '1s/    links:/#   links:/;t' -e '1,/    links:/s//#   links:/' -e '1s/      - maildev/#     - maildev/;t' -e '1,/      - maildev/s//#     - maildev/' docker-compose.dev.yml > docker-compose.dev.yml.new
+    mv docker-compose.dev.yml.new docker-compose.dev.yml
     wait
+
+    echo '> Launching Docker images in daemon mode..'
+    bin/docker-dev-up -d nginx-proxy
+    wait
+
+    echo '> Migrating database..'
+    bin/docker-dev run builder docker/wait-for-it.sh mysql:3306 -t 90
 
     if [ -f 'bin/docker-dev-migrate' ]
     then
@@ -40,10 +48,12 @@ then
       else
         CONTAINER='php'
       fi
-      echo '> Migrating database..'
       bin/docker-dev run -w /opt ${CONTAINER} "php src/vendor/bin/phinx migrate"
     fi
     wait
+
+    sed -e 's/#   links:/    links:/g' -e 's/#     - maildev/      - maildev/g' docker-compose.dev.yml > docker-compose.dev.yml.new
+    mv docker-compose.dev.yml.new docker-compose.dev.yml
 
     if [ -d 'docker/web' ]
     then
@@ -73,9 +83,8 @@ then
     fi
   fi
 
-  echo '> Launching in Chrome..'
   /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
-  echo '> Site running at URL: https://'${IPADDRESS}
+  echo '> Site running in Chrome at URL: https://'${IPADDRESS}
 
   mv src/.env.new src/.env
   echo '> Setup complete'
