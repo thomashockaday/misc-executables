@@ -17,7 +17,7 @@ Below is a breakdown of each script. They should be ran from the root folder of 
 | --- | --- | --- |
 | __config__ | Variable storage. Running this won't do anything. | none |
 | __importexecs__ | Transfers repo files into `/usr/local/sbin` | `$ importexecs` |
-| __setup__ | Quickly setup and launch a development environment using either Docker or Vagrant as a parameter. Optional parameter includes dependency installation and .env file creation. | `$ setup [docker/vagrant] [initial?]` |
+| __setup__ | Quickly setup and launch a development environment using Docker. Optional parameter includes dependency installation and .env file creation. | `$ setup [initial?]` |
 | __docssh__ | Enter a running Docker web container | `$ docssh` |
 | __mysqlport__ | Print the port number of the running mysql Docker container | `$ mysqlport` |
 | __brewm__ | Update Homebrew as well as any installed formulae, then check for errors | `$ brewm` |

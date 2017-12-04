@@ -1,137 +1,98 @@
 #!/bin/bash
 
-# $1 = PLATFORM
-# $2 = INITIAL
+# $1 = INITIAL
 
 # Usage Cases:
-# $ setup docker
-# $ setup docker initial
-# $ setup vagrant
-# $ setup vagrant initial
+# $ setup
+# $ setup initial
 
-printError () {
-  echo 'Error:' $1
-  if [ $2 ]
+echo '> Pulling changes from the remote repository..'
+git pull
+
+if [ $1 ] && [ $1 = 'initial' ]
+then
+  if [ -f 'src/.env.example' ]
   then
-    echo 'Possible usage cases:'
-    if [[ $2 == *'d'* ]]
-    then
-      echo '$ setup docker initial'
-      echo '$ setup docker'
-    fi
-    if [[ $2 == *'v'* ]]
-    then
-      echo '$ setup vagrant initial'
-      echo '$ setup vagrant'
-    fi
-  fi
-}
 
-if [ $1 ]
+    # Make changes to environment constants
+    sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env.new
+    mv src/.env.new src/.env
+    echo '> Generating .env file..'
+    echo '> Set APP_IN_TEST_MODE to true'
+    echo '> Set CACHE_DRIVER to array'
+    echo '> Commented out SMTP_SERVER=maildev'
+
+  fi
+
+  echo '> Installing dependencies..'
+  composer install
+  wait
+  yarn --pure-lockfile
+  wait
+
+fi
+
+if [ -f 'docker-compose.dev.yml' ]
 then
 
-  echo '> Pulling changes from the remote repository..'
-  git pull
+  echo '> Launching Docker images in daemon mode..'
+  bin/docker-dev-up -d
+  wait
 
-  if [ $2 ] && [ $2 = 'initial' ]
+  if [ -f 'bin/docker-dev-migrate' ]
   then
-    if [ -f 'src/.env.example' ]
-    then
-
-      # Make changes to environment constants
-      sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env.new
-      mv src/.env.new src/.env
-      echo '> Generating .env file..'
-      echo '> Set APP_IN_TEST_MODE to true'
-      echo '> Set CACHE_DRIVER to array'
-      echo '> Commented out SMTP_SERVER=maildev'
-
-    fi
-
-    echo '> Installing dependencies..'
-    composer install
-    wait
-    yarn --pure-lockfile
-    wait
-
-  fi
-
-  if [ $1 = 'vagrant' ]
-  then
-    if [ -f 'Vagrantfile' ]
-    then
-
-      # Grab the IP address from Vagrantfile
-      IPLINE=$(grep 'ip: ' Vagrantfile)
-      IPADDRESS=$(echo ${IPLINE#*ip: } | sed -e 's/^"//' -e 's/"$//')
-
-      # Set environment constants for the Vagrant platform
-      sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
-      echo '> Set APP_SECURE to false'
-      echo '> Set APP_HOST to' ${IPADDRESS}
-      echo '> Preparing virtual machine..'
-      vagrant up
-      wait
-
-    else
-      printError 'No Vagrantfile detected.' v
-      exit
-    fi
-  elif [ $1 = 'docker' ]
-  then
-    if [ -f 'docker-compose.dev.yml' ]
-    then
-
-      echo '> Launching Docker images in daemon mode..'
-      bin/docker-dev-up -d
-      wait
-
-      if [ -f 'bin/docker-dev-migrate' ]
-      then
-      	bin/docker-dev-migrate
-      else
-        if [ -d 'docker/web' ]
-        then
-          CONTAINER='web'
-        else
-          CONTAINER='php'
-        fi
-        echo '> Migrating database..'
-        bin/docker-dev run -w /opt ${CONTAINER} "php src/vendor/bin/phinx migrate"
-      fi
-      wait
-
-      if [ -d 'docker/web' ]
-      then
-        IPADDRESS=$(bin/docker-dev port nginx-proxy 443)
-      else
-        IPADDRESS=$(docker-compose port nginx-proxy 443)
-      fi
-
-      if [ -f 'src/.env.example' ]
-      then
-
-        # Set environment constants for the Docker platform
-        sed -e 's/APP_SECURE=false/APP_SECURE=true/g' -e 's/APP_HOST=.*/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
-        echo '> Set APP_SECURE to true'
-        echo '> Set APP_HOST to' ${IPADDRESS}
-        wait
-
-      fi
-    else
-      printError 'No docker.compose.dev.yml file detected.' d
-      exit
-    fi
+  	bin/docker-dev-migrate
   else
-    printError 'Incorrect platform parameter entered.' vd
-    exit
+    if [ -d 'docker/web' ]
+    then
+      CONTAINER='web'
+    else
+      CONTAINER='php'
+    fi
+    echo '> Migrating database..'
+    bin/docker-dev run -w /opt ${CONTAINER} "php src/vendor/bin/phinx migrate"
   fi
-  echo '> Launching in Chrome..'
-  /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
-  echo '> Site running at URL: https://'${IPADDRESS}
+  wait
 
-  mv src/.env.new src/.env
-  echo '> Setup complete'
+  if [ -d 'docker/web' ]
+  then
+    IPADDRESS=$(bin/docker-dev port nginx-proxy 443)
+  else
+    IPADDRESS=$(docker-compose port nginx-proxy 443)
+  fi
+
+  if [ -f 'src/.env.example' ]
+  then
+
+    # Set environment constants for the Docker platform
+    sed -e 's/APP_SECURE=false/APP_SECURE=true/g' -e 's/APP_HOST=.*/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
+    echo '> Set APP_SECURE to true'
+    echo '> Set APP_HOST to' ${IPADDRESS}
+    wait
+
+  fi
 else
-  printError 'No platform entered.' vd
+  if [ -f 'Vagrantfile' ]
+  then
+
+    # Grab the IP address from Vagrantfile
+    IPLINE=$(grep 'ip: ' Vagrantfile)
+    IPADDRESS=$(echo ${IPLINE#*ip: } | sed -e 's/^"//' -e 's/"$//')
+
+    # Set environment constants for the Vagrant platform
+    sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
+    echo '> Set APP_SECURE to false'
+    echo '> Set APP_HOST to' ${IPADDRESS}
+    echo '> Preparing virtual machine..'
+    vagrant up
+    wait
+
+  fi
 fi
+
+echo '> Launching in Chrome..'
+/usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
+echo '> Site running at URL: https://'${IPADDRESS}
+
+mv src/.env.new src/.env
+echo '> Setup complete'
