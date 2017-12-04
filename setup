@@ -1,20 +1,14 @@
 #!/bin/bash
 
-# $1 = INITIAL
-
-# Usage Cases:
-# $ setup
-# $ setup initial
-
 if [ -f 'src/.env.example' ]
 then
+
   echo '> Pulling changes from the remote repository..'
   git pull
 
   if [ $1 ] && [ $1 = 'initial' ]
   then
 
-    # Make changes to environment constants
     sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env.new
     mv src/.env.new src/.env
     echo '> Generating .env file..'
@@ -24,7 +18,6 @@ then
 
     echo '> Installing dependencies..'
     composer install
-    wait
     yarn --pure-lockfile
     wait
 
@@ -39,41 +32,37 @@ then
 
     if [ -f 'bin/docker-dev-migrate' ]
     then
-  	   bin/docker-dev-migrate
-     else
-       if [ -d 'docker/web' ]
-       then
-         CONTAINER='web'
-       else
-         CONTAINER='php'
-       fi
-       echo '> Migrating database..'
-       bin/docker-dev run -w /opt ${CONTAINER} "php src/vendor/bin/phinx migrate"
-     fi
-     wait
+      bin/docker-dev-migrate
+    else
+      if [ -d 'docker/web' ]
+      then
+        CONTAINER='web'
+      else
+        CONTAINER='php'
+      fi
+      echo '> Migrating database..'
+      bin/docker-dev run -w /opt ${CONTAINER} "php src/vendor/bin/phinx migrate"
+    fi
+    wait
 
-     if [ -d 'docker/web' ]
-     then
-       IPADDRESS=$(bin/docker-dev port nginx-proxy 443)
-     else
-       IPADDRESS=$(docker-compose port nginx-proxy 443)
-     fi
+    if [ -d 'docker/web' ]
+    then
+      IPADDRESS=$(bin/docker-dev port nginx-proxy 443)
+    else
+      IPADDRESS=$(docker-compose port nginx-proxy 443)
+    fi
 
-       # Set environment constants for the Docker platform
-       sed -e 's/APP_SECURE=false/APP_SECURE=true/g' -e 's/APP_HOST=.*/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
-       echo '> Set APP_SECURE to true'
-       echo '> Set APP_HOST to' ${IPADDRESS}
-       wait
+    sed -e 's/APP_SECURE=false/APP_SECURE=true/g' -e 's/APP_HOST=.*/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
+    echo '> Set APP_SECURE to true'
+    echo '> Set APP_HOST to' ${IPADDRESS}
 
-   else
-     if [ -f 'Vagrantfile' ]
-     then
+  else
+    if [ -f 'Vagrantfile' ]
+    then
 
-       # Grab the IP address from Vagrantfile
-       IPLINE=$(grep 'ip: ' Vagrantfile)
-       IPADDRESS=$(echo ${IPLINE#*ip: } | sed -e 's/^"//' -e 's/"$//')
+      IPLINE=$(grep 'ip: ' Vagrantfile)
+      IPADDRESS=$(echo ${IPLINE#*ip: } | sed -e 's/^"//' -e 's/"$//')
 
-      # Set environment constants for the Vagrant platform
       sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
       echo '> Set APP_SECURE to false'
       echo '> Set APP_HOST to' ${IPADDRESS}
