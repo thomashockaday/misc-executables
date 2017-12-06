@@ -67,20 +67,9 @@ then
     echo '> Set APP_HOST to' ${IPADDRESS}
 
   else
-    if [ -f 'Vagrantfile' ]
-    then
-
-      IPLINE=$(grep 'ip: ' Vagrantfile)
-      IPADDRESS=$(echo ${IPLINE#*ip: } | sed -e 's/^"//' -e 's/"$//')
-
-      sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=example.com/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
-      echo '> Set APP_SECURE to false'
-      echo '> Set APP_HOST to' ${IPADDRESS}
-      echo '> Preparing virtual machine..'
-      vagrant up
-      wait
-
-    fi
+    echo 'ERROR: No docker-compose.dev.yml file found.'
+    echo 'Please use Vagrant instead.'
+    exit;
   fi
 
   /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
