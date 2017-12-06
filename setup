@@ -69,7 +69,7 @@ then
   else
     echo 'ERROR: No docker-compose.dev.yml file found.'
     echo 'Please use Vagrant instead.'
-    exit;
+    exit
   fi
 
   /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
