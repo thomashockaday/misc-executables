@@ -1,5 +1,3 @@
 #!/bin/bash
 
-ADDRESS=$(docker ps --filter "name=mysql" --format "{{.Ports}}")
-PORT=$(echo $(echo $ADDRESS | cut -d ':' -f 2) | cut -d '-' -f 1)
-echo $PORT
+(((bin/docker-dev ps | grep mysql) | cut -d ':' -f 2) | cut -d '-' -f 1)
