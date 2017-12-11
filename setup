@@ -62,7 +62,8 @@ then
       IPADDRESS=$(docker-compose port nginx-proxy 443)
     fi
 
-    sed -e 's/APP_HOST=.*/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
+    sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=.*/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
+    echo '> Set APP_SECURE to false' 
     echo '> Set APP_HOST to' ${IPADDRESS}
 
   else
