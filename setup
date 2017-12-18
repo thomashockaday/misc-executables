@@ -26,14 +26,13 @@ then
   if [ -f 'docker-compose.dev.yml' ]
   then
 
-    echo '> Ignoring maildev links..'
-
     if [ -f 'docker-compose.staging.yml' ]
     then
+      echo '> Ignoring maildev links..'
       sed -e '1s/    links:/#   links:/;t' -e '1,/    links:/s//#   links:/' -e '1s/      - maildev/#     - maildev/;t' -e '1,/      - maildev/s//#     - maildev/' docker-compose.dev.yml > docker-compose.dev.yml.new
       mv docker-compose.dev.yml.new docker-compose.dev.yml
+      wait
     fi
-    wait
 
     echo '> Launching Docker images in daemon mode..'
     bin/docker-dev-up -d nginx-proxy
@@ -74,7 +73,7 @@ then
     fi
 
     sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=.*/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
-    echo '> Set APP_SECURE to false' 
+    echo '> Set APP_SECURE to false'
     echo '> Set APP_HOST to' ${IPADDRESS}
 
   else
