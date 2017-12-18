@@ -27,8 +27,12 @@ then
   then
 
     echo '> Ignoring maildev links..'
-    sed -e '1s/    links:/#   links:/;t' -e '1,/    links:/s//#   links:/' -e '1s/      - maildev/#     - maildev/;t' -e '1,/      - maildev/s//#     - maildev/' docker-compose.dev.yml > docker-compose.dev.yml.new
-    mv docker-compose.dev.yml.new docker-compose.dev.yml
+
+    if [ -f 'docker-compose.staging.yml' ]
+    then
+      sed -e '1s/    links:/#   links:/;t' -e '1,/    links:/s//#   links:/' -e '1s/      - maildev/#     - maildev/;t' -e '1,/      - maildev/s//#     - maildev/' docker-compose.dev.yml > docker-compose.dev.yml.new
+      mv docker-compose.dev.yml.new docker-compose.dev.yml
+    fi
     wait
 
     echo '> Launching Docker images in daemon mode..'
@@ -36,7 +40,11 @@ then
     wait
 
     echo '> Migrating database..'
-    bin/docker-dev run builder docker/wait-for-it.sh mysql:3306 -t 90
+
+    if [ -f 'docker/wait-for-it.sh' ]
+    then
+      bin/docker-dev run builder docker/wait-for-it.sh mysql:3306 -t 90
+    fi
 
     if [ -f 'bin/docker-dev-migrate' ]
     then
@@ -52,8 +60,11 @@ then
     fi
     wait
 
-    sed -e 's/#   links:/    links:/g' -e 's/#     - maildev/      - maildev/g' docker-compose.dev.yml > docker-compose.dev.yml.new
-    mv docker-compose.dev.yml.new docker-compose.dev.yml
+    if [ -f 'docker-compose.staging.yml' ]
+    then
+      sed -e 's/#   links:/    links:/g' -e 's/#     - maildev/      - maildev/g' docker-compose.dev.yml > docker-compose.dev.yml.new
+      mv docker-compose.dev.yml.new docker-compose.dev.yml
+    fi
 
     if [ -d 'docker/web' ]
     then
