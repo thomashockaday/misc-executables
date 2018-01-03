@@ -22,6 +22,7 @@ Below is a breakdown of each script. They should be ran from the root folder of 
 | __mysqlport__ | Print the port number of the running mysql Docker container | `$ mysqlport` |
 | __brewm__ | Update Homebrew as well as any installed formulae, then check for errors | `$ brewm` |
 | __weather__ | Show the weather forecast for your configured location | `$ weather` |
+| __awslogin__ | Generates a 12 hour login token for Amazon Elastic Container Registry | `$ awslogin` |
 
 ---
 
