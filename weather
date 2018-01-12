@@ -1,5 +1,0 @@
-#!/bin/bash
-
-source config
-
-curl -4 http://wttr.in/${LOCATION}
