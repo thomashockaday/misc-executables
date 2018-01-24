@@ -27,18 +27,14 @@ main() {
         mv docker-compose.dev.yml.new docker-compose.dev.yml
       fi
 
-      if [ -d 'docker/web' ]; then
-        IPADDRESS=$(bin/docker-dev port nginx-proxy 443)
-      else
-        IPADDRESS=$(docker-compose port nginx-proxy 443)
-      fi
+      local ipAddress=$(bin/docker-dev port nginx-proxy 443)
 
-      sed -e 's/APP_HOST=.*/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
-      echo '> Set APP_HOST to' ${IPADDRESS}
+      sed -e 's/APP_HOST=.*/APP_HOST='${ipAddress}'/g' src/.env > src/.env.new
+      echo '> Set APP_HOST to' ${ipAddress}
       mv src/.env.new src/.env
 
-      /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
-      echo '> Site running in Chrome at URL: https://'${IPADDRESS}
+      /usr/bin/open -a '/Applications/Google Chrome.app' https://${ipAddress}
+      echo '> Site running in Chrome at URL: https://'${ipAddress}
       echo '> Setup complete'
     else
       echo 'ERROR: No docker-compose.dev.yml file found.'
@@ -74,11 +70,11 @@ migrateDatabase() {
     bin/docker-dev-migrate
   else
     if [ -d 'docker/web' ]; then
-      CONTAINER='web'
+      local container='web'
     else
-      CONTAINER='php'
+      local container='php'
     fi
-    bin/docker-dev run -w /opt ${CONTAINER} "php src/vendor/bin/phinx migrate"
+    bin/docker-dev run -w /opt ${container} "php src/vendor/bin/phinx migrate"
   fi
 }
 
