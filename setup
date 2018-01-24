@@ -1,94 +1,93 @@
 #!/bin/bash
 
-if [ -f 'src/.env.example' ]
-then
-
-  echo '> Pulling changes from the remote repository..'
-  git pull
-
-  if ([ $1 ] && [ $1 = 'initial' ]) || [ ! -f 'src/.env' ]
+main() {
+  if [ -f 'src/.env.example' ]
   then
+    echo '> Pulling changes from the remote repository..'
+    git pull
 
-    sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env.new
-    mv src/.env.new src/.env
-    echo '> Generating .env file..'
-    echo '> Set APP_IN_TEST_MODE to true'
-    echo '> Set CACHE_DRIVER to array'
-    echo '> Commented out SMTP_SERVER=maildev'
-
-    echo '> Installing dependencies..'
-    composer install
-    yarn --pure-lockfile
-    wait
-
-  fi
-
-  if [ -f 'docker-compose.dev.yml' ]
-  then
-
-    if [ -f 'docker-compose.build.yml' ]
+    if [ ! -f 'src/.env' ]
     then
-      echo '> Ignoring maildev links..'
-      sed -e '1s/    links:/#   links:/;t' -e '1,/    links:/s//#   links:/' -e '1s/      - maildev/#     - maildev/;t' -e '1,/      - maildev/s//#     - maildev/' docker-compose.dev.yml > docker-compose.dev.yml.new
-      mv docker-compose.dev.yml.new docker-compose.dev.yml
-      wait
+      generateEnvFile
+      installDependencies
     fi
 
-    echo '> Launching Docker images in daemon mode..'
-    bin/docker-dev-up -d nginx-proxy
-    wait
-
-    echo '> Migrating database..'
-
-    if [ -f 'docker/wait-for-it.sh' ]
+    if [ -f 'docker-compose.dev.yml' ]
     then
-      bin/docker-dev run builder docker/wait-for-it.sh mysql:3306 -t 90
-    fi
+      if [ -f 'docker-compose.build.yml' ]
+      then
+        echo '> Ignoring maildev links..'
+        sed -e '1s/    links:/#   links:/;t' -e '1,/    links:/s//#   links:/' -e '1s/      - maildev/#     - maildev/;t' -e '1,/      - maildev/s//#     - maildev/' docker-compose.dev.yml > docker-compose.dev.yml.new
+        mv docker-compose.dev.yml.new docker-compose.dev.yml
+      fi
 
-    if [ -f 'bin/docker-dev-migrate' ]
-    then
-      bin/docker-dev-migrate
-    else
+      echo '> Launching Docker images in daemon mode..'
+      bin/docker-dev-up -d nginx-proxy
+
+      migrateDatabase
+
+      if [ -f 'docker-compose.build.yml' ]
+      then
+        sed -e 's/#   links:/    links:/g' -e 's/#     - maildev/      - maildev/g' docker-compose.dev.yml > docker-compose.dev.yml.new
+        mv docker-compose.dev.yml.new docker-compose.dev.yml
+      fi
+
       if [ -d 'docker/web' ]
       then
-        CONTAINER='web'
+        IPADDRESS=$(bin/docker-dev port nginx-proxy 443)
       else
-        CONTAINER='php'
+        IPADDRESS=$(docker-compose port nginx-proxy 443)
       fi
-      bin/docker-dev run -w /opt ${CONTAINER} "php src/vendor/bin/phinx migrate"
-    fi
-    wait
 
-    if [ -f 'docker-compose.build.yml' ]
-    then
-      sed -e 's/#   links:/    links:/g' -e 's/#     - maildev/      - maildev/g' docker-compose.dev.yml > docker-compose.dev.yml.new
-      mv docker-compose.dev.yml.new docker-compose.dev.yml
-    fi
+      sed -e 's/APP_HOST=.*/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
+      echo '> Set APP_HOST to' ${IPADDRESS}
+      mv src/.env.new src/.env
 
-    if [ -d 'docker/web' ]
-    then
-      IPADDRESS=$(bin/docker-dev port nginx-proxy 443)
+      /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
+      echo '> Site running in Chrome at URL: https://'${IPADDRESS}
+      echo '> Setup complete'
     else
-      IPADDRESS=$(docker-compose port nginx-proxy 443)
+      echo 'ERROR: No docker-compose.dev.yml file found.'
+      echo 'Please use Vagrant instead.'
     fi
-
-    sed -e 's/APP_SECURE=true/APP_SECURE=false/g' -e 's/APP_HOST=.*/APP_HOST='${IPADDRESS}'/g' src/.env > src/.env.new
-    echo '> Set APP_SECURE to false'
-    echo '> Set APP_HOST to' ${IPADDRESS}
-
   else
-    echo 'ERROR: No docker-compose.dev.yml file found.'
-    echo 'Please use Vagrant instead.'
-    exit
+    echo 'ERROR: No .env.example file found.'
   fi
 
-  /usr/bin/open -a '/Applications/Google Chrome.app' https://${IPADDRESS}
-  echo '> Site running in Chrome at URL: https://'${IPADDRESS}
+  exit 0
+}
 
+generateEnvFile() {
+  echo '> Generating .env file..'
+  sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env.new
   mv src/.env.new src/.env
-  echo '> Setup complete'
+  echo '> Set APP_IN_TEST_MODE to true'
+  echo '> Set CACHE_DRIVER to array'
+  echo '> Commented out SMTP_SERVER=maildev'
+}
 
-else
-  echo 'ERROR: No .env.example file found.'
-  exit
-fi
+installDependencies() {
+  echo '> Installing dependencies..'
+  composer install
+  yarn --pure-lockfile
+}
+
+migrateDatabase() {
+  echo '> Migrating database..'
+
+  if [ -f 'docker/wait-for-it.sh' ]
+  then
+    bin/docker-dev run builder docker/wait-for-it.sh mysql:3306 -t 90
+    bin/docker-dev-migrate
+  else
+    if [ -d 'docker/web' ]
+    then
+      CONTAINER='web'
+    else
+      CONTAINER='php'
+    fi
+    bin/docker-dev run -w /opt ${CONTAINER} "php src/vendor/bin/phinx migrate"
+  fi
+}
+
+main "$@"
