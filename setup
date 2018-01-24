@@ -1,21 +1,17 @@
 #!/bin/bash
 
 main() {
-  if [ -f 'src/.env.example' ]
-  then
+  if [ -f 'src/.env.example' ]; then
     echo '> Pulling changes from the remote repository..'
     git pull
 
-    if [ ! -f 'src/.env' ]
-    then
+    if [ ! -f 'src/.env' ]; then
       generateEnvFile
       installDependencies
     fi
 
-    if [ -f 'docker-compose.dev.yml' ]
-    then
-      if [ -f 'docker-compose.build.yml' ]
-      then
+    if [ -f 'docker-compose.dev.yml' ]; then
+      if [ -f 'docker-compose.build.yml' ]; then
         echo '> Ignoring maildev links..'
         sed -e '1s/    links:/#   links:/;t' -e '1,/    links:/s//#   links:/' -e '1s/      - maildev/#     - maildev/;t' -e '1,/      - maildev/s//#     - maildev/' docker-compose.dev.yml > docker-compose.dev.yml.new
         mv docker-compose.dev.yml.new docker-compose.dev.yml
@@ -26,14 +22,12 @@ main() {
 
       migrateDatabase
 
-      if [ -f 'docker-compose.build.yml' ]
-      then
+      if [ -f 'docker-compose.build.yml' ]; then
         sed -e 's/#   links:/    links:/g' -e 's/#     - maildev/      - maildev/g' docker-compose.dev.yml > docker-compose.dev.yml.new
         mv docker-compose.dev.yml.new docker-compose.dev.yml
       fi
 
-      if [ -d 'docker/web' ]
-      then
+      if [ -d 'docker/web' ]; then
         IPADDRESS=$(bin/docker-dev port nginx-proxy 443)
       else
         IPADDRESS=$(docker-compose port nginx-proxy 443)
@@ -75,13 +69,11 @@ installDependencies() {
 migrateDatabase() {
   echo '> Migrating database..'
 
-  if [ -f 'docker/wait-for-it.sh' ]
-  then
+  if [ -f 'docker/wait-for-it.sh' ]; then
     bin/docker-dev run builder docker/wait-for-it.sh mysql:3306 -t 90
     bin/docker-dev-migrate
   else
-    if [ -d 'docker/web' ]
-    then
+    if [ -d 'docker/web' ]; then
       CONTAINER='web'
     else
       CONTAINER='php'
