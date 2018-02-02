@@ -22,10 +22,7 @@ main() {
 
       migrateDatabase
 
-      if [ -f 'docker-compose.build.yml' ]; then
-        sed -e 's/#   links:/    links:/g' -e 's/#     - maildev/      - maildev/g' docker-compose.dev.yml > docker-compose.dev.yml.new
-        mv docker-compose.dev.yml.new docker-compose.dev.yml
-      fi
+      git checkout -- .
 
       local ipAddress=$(bin/docker-dev port nginx-proxy 443)
 
