@@ -46,8 +46,7 @@ main() {
 
 generateEnvFile() {
   echo '> Generating .env file..'
-  sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env.new
-  mv src/.env.new src/.env
+  sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env
   echo '> Set APP_IN_TEST_MODE to true'
   echo '> Set CACHE_DRIVER to array'
   echo '> Commented out SMTP_SERVER=maildev'
