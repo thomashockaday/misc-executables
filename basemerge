@@ -1,0 +1,8 @@
+#!/bin/bash
+
+source config
+
+git checkout -b feature/base-merge
+git remote add upstream $UPSTREAM
+git fetch upstream $1 && \
+git merge upstream/$1
