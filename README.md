@@ -15,15 +15,15 @@ Below is a breakdown of each script. They should be ran from the root folder of 
 
 | File | Description | Usage Case |
 | --- | --- | --- |
-| __config__ | Variable storage. Running this won't do anything. | none |
-| __importexecs__ | Transfers repo files into `/usr/local/sbin` | `$ importexecs` |
-| __setup__ | Quickly setup and launch a development environment using Docker | `$ setup` |
-| __dsh__ | Enter a running Docker web container | `$ dsh` |
-| __mysqlport__ | Print the port number of the running mysql Docker container | `$ mysqlport` |
-| __brewm__ | Update Homebrew as well as any installed formulae, then check for errors | `$ brewm` |
 | __awslogin__ | Generates a 12 hour login token for Amazon Elastic Container Registry | `$ awslogin` |
-| __dockill__ | Removes all exited Docker containers | `$ dockill` |
 | __basemerge__ | Merges a branch against the upstream repo defined in `config` | `$ basemerge [branch]` |
+| __config__ | Variable storage. Running this won't do anything. | none |
+| __brewm__ | Update Homebrew as well as any installed formulae, then check for errors | `$ brewm` |
+| __dockill__ | Removes all exited Docker containers | `$ dockill` |
+| __dsh__ | Enter a running Docker web container | `$ dsh` |
+| __importexecs__ | Transfers repo files into `/usr/local/sbin` | `$ importexecs` |
+| __mysqlport__ | Print the port number of the running mysql Docker container | `$ mysqlport` |
+| __setup__ | Quickly setup and launch a development environment using Docker | `$ setup` |
 
 ---
 
