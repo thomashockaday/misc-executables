@@ -7,7 +7,9 @@ main() {
 
     if [ ! -f 'src/.env' ]; then
       generateEnvFile
+      rm -rf node_modules
       installDependencies
+      bin/docker-dev build --pull
     fi
 
     if [ -f 'docker-compose.dev.yml' ]; then
