@@ -60,7 +60,7 @@ generateEnvFile() {
 installDependencies() {
   echo '> Installing dependencies..'
   composer install
-  yarn --pure-lockfile
+  yarn --frozen-lockfile &
 }
 
 migrateDatabase() {
