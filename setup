@@ -8,7 +8,8 @@ main() {
     if [ ! -f 'src/.env' ]; then
       generateEnvFile
       rm -rf node_modules
-      installDependencies
+      echo '> Installing dependencies in the background..'
+      installDependencies > /dev/null 2&>1 &
       bin/docker-dev build --pull
     fi
 
@@ -58,9 +59,8 @@ generateEnvFile() {
 }
 
 installDependencies() {
-  echo '> Installing dependencies..'
   composer install
-  yarn --frozen-lockfile &
+  yarn --frozen-lockfile
 }
 
 migrateDatabase() {
