@@ -9,7 +9,7 @@ main() {
       generateEnvFile
       rm -rf node_modules
       echo '> Installing dependencies in the background..'
-      installDependencies > /dev/null 2&>1 &
+      installDependencies > /dev/null 2>&1 &
       bin/docker-dev build --pull
     fi
 
