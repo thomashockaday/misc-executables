@@ -13,25 +13,20 @@ main() {
       bin/docker-dev build --pull
     fi
 
-    if [ -f 'docker-compose.dev.yml' ]; then
-      echo '> Launching Docker images in daemon mode..'
-      bin/docker-dev-up -d
+    echo '> Launching Docker images in daemon mode..'
+    bin/docker-dev-up -d
 
-      migrateDatabase
+    migrateDatabase
 
-      local ipAddress=$(bin/docker-dev port nginx-proxy 443)
+    local ipAddress=$(bin/docker-dev port nginx-proxy 443)
 
-      sed -e 's/APP_HOST=.*/APP_HOST='${ipAddress}'/g' src/.env > src/.env.new
-      echo '> Set APP_HOST to' ${ipAddress}
-      mv src/.env.new src/.env
+    sed -e 's/APP_HOST=.*/APP_HOST='${ipAddress}'/g' src/.env > src/.env.new
+    echo '> Set APP_HOST to' ${ipAddress}
+    mv src/.env.new src/.env
 
-      /usr/bin/open -a '/Applications/Google Chrome.app' https://${ipAddress}
-      echo '> Site running in Chrome at URL: https://'${ipAddress}
-      echo '> Setup complete'
-    else
-      echo 'ERROR: No docker-compose.dev.yml file found.'
-      echo 'Please use Vagrant instead.'
-    fi
+    /usr/bin/open -a '/Applications/Google Chrome.app' https://${ipAddress}
+    echo '> Site running in Chrome at URL: https://'${ipAddress}
+    echo '> Setup complete'
   else
     echo 'ERROR: No .env.example file found.'
   fi
