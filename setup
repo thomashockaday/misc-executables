@@ -14,21 +14,10 @@ main() {
     fi
 
     if [ -f 'docker-compose.dev.yml' ]; then
-      git stash
-
-      if [ -f 'docker-compose.build.yml' ]; then
-        echo '> Ignoring maildev links..'
-        sed -e '1s/    links:/#   links:/;t' -e '1,/    links:/s//#   links:/' -e '1s/      - maildev/#     - maildev/;t' -e '1,/      - maildev/s//#     - maildev/' docker-compose.dev.yml > docker-compose.dev.yml.new
-        mv docker-compose.dev.yml.new docker-compose.dev.yml
-      fi
-
       echo '> Launching Docker images in daemon mode..'
-      bin/docker-dev-up -d nginx-proxy
+      bin/docker-dev-up -d
 
       migrateDatabase
-
-      git checkout -- .
-      git stash pop
 
       local ipAddress=$(bin/docker-dev port nginx-proxy 443)
 
