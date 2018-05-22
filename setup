@@ -70,12 +70,7 @@ migrateDatabase() {
     bin/docker-dev run builder docker/wait-for-it.sh mysql:3306 -t 90
     bin/docker-dev-migrate
   else
-    if [ -d 'docker/web' ]; then
-      local container='web'
-    else
-      local container='php'
-    fi
-    bin/docker-dev run -w /opt ${container} "php src/vendor/bin/phinx migrate"
+    bin/docker-dev run -w /opt web "php src/vendor/bin/phinx migrate"
   fi
 }
 
