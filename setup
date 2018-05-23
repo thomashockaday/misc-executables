@@ -49,13 +49,8 @@ installDependencies() {
 
 migrateDatabase() {
   echo '> Migrating database..'
-
-  if [ -f 'docker/wait-for-it.sh' ]; then
-    bin/docker-dev run builder docker/wait-for-it.sh mysql:3306 -t 90
-    bin/docker-dev-migrate
-  else
-    bin/docker-dev run -w /opt web "php src/vendor/bin/phinx migrate"
-  fi
+  bin/docker-dev run builder docker/wait-for-it.sh mysql:3306 -t 90
+  bin/docker-dev-migrate
 }
 
 main "$@"
