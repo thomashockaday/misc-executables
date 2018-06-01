@@ -7,9 +7,8 @@ main() {
 
     if [ ! -f 'src/.env' ]; then
       generateEnvFile
-      rm -rf node_modules
-      echo '> Installing dependencies in the background..'
-      installDependencies > /dev/null 2>&1 &
+      rm -rf node_modules && \
+      installDependencies
       bin/docker-dev build --pull
     fi
 
@@ -43,6 +42,7 @@ generateEnvFile() {
 }
 
 installDependencies() {
+  echo '> Installing dependencies..'
   composer install
   yarn --frozen-lockfile
 }
