@@ -6,7 +6,7 @@
 - Create a config file by copying the `config.example` file and removing ".example"
 - Edit the `config` file, setting `WORKDIR` to the location of the folder where you downloaded the repo to.
 - Create a copy of all of the executable files in `/usr/local/sbin`. You can do this quickly by dragging the `importexecs` file into a Terminal window.
-- Add `export PATH="/usr/local/sbin:$PATH"` to the bottom of `~/.zshrc`.
+- Add `export PATH="/usr/local/sbin:$PATH"` to the bottom of your profile. You can do this quickly by running `$ echo export PATH="/usr/local/sbin:$PATH" >> ~/.zshrc` (or relevant profile).
 - That's it!
 
 ---
