@@ -24,6 +24,7 @@ Below is a breakdown of each script. They should be ran from the root folder of 
 | __importexecs__ | Transfers repo files into `/usr/local/sbin` | `$ importexecs` |
 | __mysqlport__ | Print the port number of the running mysql Docker container | `$ mysqlport` |
 | __setup__ | Quickly setup and launch a development environment using Docker | `$ setup` |
+| __migration__ | Add a new Phinx migration without manually entering the Docker container | `$ migration [ClassName]` |
 
 ---
 
