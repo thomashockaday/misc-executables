@@ -23,7 +23,7 @@ main() {
     echo '> Set APP_HOST to' ${ipAddress}
     mv src/.env.new src/.env
 
-    /usr/bin/open -a '/Applications/Google Chrome.app' https://${ipAddress}
+    open -a '/Applications/Google Chrome.app' https://${ipAddress}
     echo '> Site running in Chrome at URL: https://'${ipAddress}
     echo '> Setup complete'
   else
