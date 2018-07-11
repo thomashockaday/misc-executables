@@ -2,30 +2,26 @@
 
 main() {
   if [ -f 'src/.env.example' ]; then
-    echo '> Pulling changes from the remote repository..'
     git pull
 
     if [ ! -f 'src/.env' ]; then
+      echo "> No .env file found. Initialising repo."
       generateEnvFile
       rm -rf node_modules && \
       installDependencies
       bin/docker-dev build --pull
     fi
 
-    echo '> Launching Docker images in daemon mode..'
     bin/docker-dev-up -d
-
     migrateDatabase
 
     local ipAddress=$(bin/docker-dev port nginx-proxy 443)
 
     sed -e 's/APP_HOST=.*/APP_HOST='${ipAddress}'/g' src/.env > src/.env.new
-    echo '> Set APP_HOST to' ${ipAddress}
     mv src/.env.new src/.env
 
     open -a '/Applications/Google Chrome.app' https://${ipAddress}
     echo '> Site running in Chrome at URL: https://'${ipAddress}
-    echo '> Setup complete'
   else
     echo 'ERROR: No .env.example file found.'
   fi
@@ -34,21 +30,15 @@ main() {
 }
 
 generateEnvFile() {
-  echo '> Generating .env file..'
   sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env
-  echo '> Set APP_IN_TEST_MODE to true'
-  echo '> Set CACHE_DRIVER to array'
-  echo '> Commented out SMTP_SERVER=maildev'
 }
 
 installDependencies() {
-  echo '> Installing dependencies..'
   composer install
   yarn --frozen-lockfile
 }
 
 migrateDatabase() {
-  echo '> Migrating database..'
   bin/docker-dev run builder docker/wait-for-it.sh mysql:3306 -t 90
   bin/docker-dev-migrate
 }
