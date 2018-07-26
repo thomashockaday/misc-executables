@@ -30,7 +30,9 @@ main() {
 }
 
 generateEnvFile() {
-  sed -e 's/APP_IN_TEST_MODE=false/APP_IN_TEST_MODE=true/g' -e 's/CACHE_DRIVER=filesystem/CACHE_DRIVER=array/g' -e '/SMTP_SERVER=maildev/s/^/# /g' src/.env.example > src/.env
+  echo 'APP_HOST=0.0.0.0' >> src/.env
+  echo 'APP_IN_TEST_MODE=true' >> src/.env
+  echo 'CACHE_DRIVER=array' >> src/.env
 }
 
 installDependencies() {
