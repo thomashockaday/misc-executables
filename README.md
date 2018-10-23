@@ -16,7 +16,7 @@ Below is a breakdown of each script. They should be ran from the root folder of 
 | File | Description | Usage Case |
 | --- | --- | --- |
 | __awslogin__ | Generates a 12 hour login token for Amazon Elastic Container Registry | `$ awslogin` |
-| __basemerge__ | Merges a branch against the upstream repo defined in `config` | `$ basemerge [branch]` |
+| __basemerge__ | Merges a branch against the upstream repo defined in `config` | `$ basemerge` |
 | __brewm__ | Update Homebrew as well as any installed formulae, then check for errors | `$ brewm` |
 | __config__ | Variable storage. Running this won't do anything. | none |
 | __dockill__ | Removes all exited Docker containers | `$ dockill` |
