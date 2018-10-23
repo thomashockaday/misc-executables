@@ -2,18 +2,10 @@
 
 source config
 
-branchName=$1
+release=$(sed -n -e "s/',//" -e "s/^[ \t]*'version' => '//p" src/config.php)
+branchName="release/$release"
 
-if [ ! $1 ]
-then
-  release=$(sed -n -e "s/',//" -e "s/^[ \t]*'version' => '//p" src/config.php)
-  branchName="release/$release"
-fi
-
-if [[ -z $baseRemote ]]
-then
-	git remote add upstream $UPSTREAM
-fi
+git remote add upstream $UPSTREAM
 
 git checkout master
 git pull
