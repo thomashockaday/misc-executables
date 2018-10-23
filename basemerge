@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 source config
 
 date=$(date +%Y-%m-%d)
