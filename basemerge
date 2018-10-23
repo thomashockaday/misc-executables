@@ -10,8 +10,13 @@ then
   branchName="release/$release"
 fi
 
+if [[ -z $baseRemote ]]
+then
+	git remote add upstream $UPSTREAM
+fi
+
+git checkout master
 git pull
 git checkout -b feature/base-merge
-git remote add upstream $UPSTREAM
 git fetch upstream $branchName && \
 git merge upstream/$branchName --no-edit
