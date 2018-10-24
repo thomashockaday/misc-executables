@@ -1,3 +1,4 @@
 #!/bin/bash
 
-bin/docker-dev exec web php src/vendor/bin/phinx create $1
+bin/docker-dev exec web php src/vendor/bin/phinx create $1 && \
+sudo chown $USER src/migrations/*
