@@ -34,7 +34,7 @@ generateEnvFile() {
 }
 
 installDependencies() {
-  composer install
+  composer install --ignore-platform-reqs
   yarn --frozen-lockfile
 }
 
