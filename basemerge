@@ -11,6 +11,4 @@ git remote add upstream $UPSTREAM
 git checkout master
 git pull
 git checkout -b feature/base-merge-$date
-git fetch upstream $branchName && \
-git merge upstream/$branchName --no-edit
-
+git pull upstream/$branchName --no-edit
