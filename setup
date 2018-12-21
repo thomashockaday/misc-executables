@@ -8,8 +8,8 @@ main() {
       echo '> No .env file found. Initialising repo.'
       generateEnvFile
       rm -rf node_modules && \
+      bin/docker-dev build --pull && \
       installDependencies
-      bin/docker-dev build --pull
     fi
 
     bin/docker-dev-up -d
