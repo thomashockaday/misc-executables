@@ -35,7 +35,12 @@ generateEnvFile() {
 
 installDependencies() {
   composer install --ignore-platform-reqs
-  yarn --frozen-lockfile
+
+  if [ -f 'bin/node' ]; then
+    bin/node yarn --frozen-lockfile
+  else
+    yarn --frozen-lockfile
+  fi
 }
 
 migrateDatabase() {
