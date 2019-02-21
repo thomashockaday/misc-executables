@@ -20,8 +20,11 @@ main() {
 
     if [ -f '/Applications/Google Chrome.app' ]; then
       open -a '/Applications/Google Chrome.app' https://${ipAddress}
-      echo "> Site running in Chrome at URL: https://${ipAddress}"
+    else
+      xdg-open https://${ipAddress}
     fi
+
+    echo "> Site running at URL: https://${ipAddress}"
   else
     echo 'ERROR: No .env.example file found.'
   fi
