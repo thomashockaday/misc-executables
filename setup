@@ -18,8 +18,13 @@ main() {
     local ipAddress=$(bin/docker-dev port nginx-proxy 443)
     bin/docker-dev exec web sed -i "/APP_HOST=.*/c\APP_HOST=${ipAddress}" src/.env
 
-    open -a '/Applications/Google Chrome.app' https://${ipAddress}
-    echo "> Site running in Chrome at URL: https://${ipAddress}"
+    if [ -f '/Applications/Google Chrome.app' ]; then
+      open -a '/Applications/Google Chrome.app' https://${ipAddress}
+    else
+      xdg-open https://${ipAddress}
+    fi
+
+    echo "> Site running at URL: https://${ipAddress}"
   else
     echo 'ERROR: No .env.example file found.'
   fi
