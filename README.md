@@ -26,7 +26,7 @@ Below is a breakdown of each script. They should be ran from the root folder of 
 | __setup__ | Quickly setup and launch a development environment using Docker | `$ setup` |
 | __migration__ | Add a new Phinx migration without manually entering the Docker container | `$ migration [ClassName]` |
 | __dclean__ | Remove all "dangling" docker images | `$ dclean` |
-| __upchain__ | Quickly merge one release branch into another via a feature branch | `$upchain 3 4` |
+| __upchain__ | Quickly merge one release branch into another via a feature branch | `$ upchain [ReleaseNumber] [TargetNumber]` |
 
 ---
 
