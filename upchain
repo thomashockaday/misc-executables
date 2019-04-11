@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+git checkout release/$1.0.0
+git pull
+git checkout release/$2.0.0
+git pull
+git checkout -b feature/r$1-into-r$2
+echo "Merging release/$1.0.0 into feature/r$1-into-r$2"
+git merge release/$1.0.0 --no-edit
