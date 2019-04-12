@@ -18,7 +18,7 @@ main() {
     local ipAddress=$(bin/docker-dev port nginx-proxy 443)
     bin/docker-dev exec web sed -i "/APP_HOST=.*/c\APP_HOST=${ipAddress}" src/.env
 
-    if [ -f '/Applications/Google Chrome.app' ]; then
+    if [ -a '/Applications/Google Chrome.app' ]; then
       open -a '/Applications/Google Chrome.app' https://${ipAddress}
     else
       xdg-open https://${ipAddress}
