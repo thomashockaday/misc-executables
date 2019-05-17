@@ -2,3 +2,4 @@
 
 WORKDIR=~/Documents/Repositories/misc-executables/
 UPSTREAM=
+UPSTREAM_URL=

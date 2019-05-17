@@ -1,0 +1,79 @@
+#!/bin/bash
+
+source config
+
+usage() {
+  echo "Usage: initialise [repo name] [production url]"
+  echo "Example: initialise dell-staples-tradein staplestrade-in.com"
+}
+
+main() {
+  if [ -z "$1" ]
+  then
+    echo "Invalid arguments supplied"
+    usage
+    exit 0
+  fi
+
+  local subcommand="$1"
+
+  case $subcommand in
+    "-h"|"--help")
+      usage
+      exit 0
+      ;;
+    *)
+      if [ -z "$2" ]
+      then
+        echo "Invalid arguments supplied"
+        usage
+        exit 0
+      fi
+
+      run "$@"
+      ;;
+  esac
+
+  exit 0
+}
+
+run() {
+  set -e
+
+  echo "git clone $UPSTREAM --branch=release/10.0.0 $1"
+
+  git clone $UPSTREAM --branch=release/10.0.0 $1
+  cd $1
+  git remote rename origin upstream
+  git remote add origin git@github.com:opia-ltd/$1.git
+  git branch -m master
+  git push -u origin master
+
+  git checkout -b feature/initial-setup
+
+  local upstreamName=$(echo $UPSTREAM | cut -d'/' -f 2 | cut -d'.' -f 1)
+
+  sed -i '' "s/$upstreamName/$1/g" docker-compose.prod.yml
+  sed -i '' "s/$upstreamName/$1/g" docker-compose.staging.yml
+  sed -i '' "s/$upstreamName/$1/g" Jenkinsfile
+  git commit -a -m "Replace $upstreamName with $1"
+
+  local baseStagingUrl=$(echo $UPSTREAM_URL | sed 's/\./-/g')
+  local stagingUrl=$(echo $2 | sed 's/\./-/g')
+
+  sed -i '' "s/$baseStagingUrl/$stagingUrl/g" docker-compose.staging.yml
+  sed -i '' "s/$baseStagingUrl/$stagingUrl/g" Jenkinsfile
+  sed -i '' "s/$UPSTREAM_URL/$2/g" docker-compose.prod.yml
+  sed -i '' "s/$UPSTREAM_URL/$2/g" Jenkinsfile
+  git commit -a -m "Set production and staging urls"
+
+  sed -i '' 's/APP_MAINTENANCE\: false/APP_MAINTENANCE\: true/g' docker-compose.prod.yml
+  git commit -a -m "Set APP_MAINTENANCE to true"
+
+  git push -u origin feature/initial-setup
+  git branch -d feature/initial-setup
+
+  exit 0
+}
+
+main "$@"
