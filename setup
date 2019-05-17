@@ -9,7 +9,7 @@ main() {
       generateEnvFile
       rm -rf node_modules && \
       bin/docker-dev build --pull && \
-      installDependencies
+      composer install --ignore-platform-reqs
     fi
 
     bin/docker-dev-up -d
@@ -23,6 +23,8 @@ main() {
     else
       xdg-open https://${ipAddress}
     fi
+
+    installNodeModules
 
     echo "> Site running at URL: https://${ipAddress}"
   else
@@ -38,9 +40,7 @@ generateEnvFile() {
   echo 'CACHE_DRIVER=array' >> src/.env
 }
 
-installDependencies() {
-  composer install --ignore-platform-reqs
-
+installNodeModules() {
   if [ -f 'bin/node' ]; then
     bin/node yarn --frozen-lockfile
   else
