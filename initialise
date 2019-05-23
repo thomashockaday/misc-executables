@@ -71,6 +71,7 @@ run() {
   git commit -a -m "Set APP_MAINTENANCE to true"
 
   git push -u origin feature/initial-setup
+  git checkout master
   git branch -d feature/initial-setup
 
   exit 0
