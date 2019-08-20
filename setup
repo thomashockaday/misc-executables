@@ -3,38 +3,39 @@
 main() {
   local shouldNodeModulesBeInstalled='false'
 
-  if [ -f 'src/.env.example' ]; then
-    git pull
-
-    if [ ! -f 'src/.env' ]; then
-      echo '> No .env file found. Initialising repo.'
-      generateEnvFile
-      rm -rf node_modules && \
-      bin/docker-dev build --pull && \
-      composer install --ignore-platform-reqs
-      $shouldNodeModulesBeInstalled='true'
-    fi
-
-    bin/docker-dev-up -d
-    migrateDatabase
-
-    local ipAddress=$(bin/docker-dev port nginx-proxy 443)
-    bin/docker-dev exec web sed -i "/APP_HOST=.*/c\APP_HOST=${ipAddress}" src/.env
-
-    if [ -a '/Applications/Google Chrome.app' ]; then
-      open -a '/Applications/Google Chrome.app' https://${ipAddress}
-    else
-      xdg-open https://${ipAddress}
-    fi
-
-    if [ "$shouldNodeModulesBeInstalled" = 'true' ]; then
-      installNodeModules
-    fi
-
-    echo "> Site running at URL: https://${ipAddress}"
-  else
+  if [ ! -f 'src/.env.example' ]; then
     echo 'ERROR: No .env.example file found.'
+    exit 1
   fi
+
+  git pull
+
+  if [ ! -f 'src/.env' ]; then
+    echo '> No .env file found. Initialising repo.'
+    generateEnvFile
+    rm -rf node_modules && \
+    bin/docker-dev build --pull && \
+    composer install --ignore-platform-reqs
+    $shouldNodeModulesBeInstalled='true'
+  fi
+
+  bin/docker-dev-up -d
+  migrateDatabase
+
+  local ipAddress=$(bin/docker-dev port nginx-proxy 443)
+  bin/docker-dev exec web sed -i "/APP_HOST=.*/c\APP_HOST=${ipAddress}" src/.env
+
+  if [ -a '/Applications/Google Chrome.app' ]; then
+    open -a '/Applications/Google Chrome.app' https://${ipAddress}
+  else
+    xdg-open https://${ipAddress}
+  fi
+
+  if [ "$shouldNodeModulesBeInstalled" = 'true' ]; then
+    installNodeModules
+  fi
+
+  echo "> Site running at URL: https://${ipAddress}"
 
   exit 0
 }
