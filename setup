@@ -1,7 +1,7 @@
 #!/bin/bash
 
 main() {
-  local shouldNodeModulesBeInstalled=false
+  local shouldNodeModulesBeInstalled='false'
 
   if [ -f 'src/.env.example' ]; then
     git pull
@@ -12,7 +12,7 @@ main() {
       rm -rf node_modules && \
       bin/docker-dev build --pull && \
       composer install --ignore-platform-reqs
-      $shouldNodeModulesBeInstalled=true
+      $shouldNodeModulesBeInstalled='true'
     fi
 
     bin/docker-dev-up -d
@@ -27,7 +27,7 @@ main() {
       xdg-open https://${ipAddress}
     fi
 
-    if [ "$shouldNodeModulesBeInstalled" = true ]; then
+    if [ "$shouldNodeModulesBeInstalled" = 'true' ]; then
       installNodeModules
     fi
 
