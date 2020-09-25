@@ -1,3 +1,0 @@
-#!/bin/bash
-
-bin/docker-dev port mysql 3306 | cut -d ':' -f2
